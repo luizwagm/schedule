@@ -66,6 +66,7 @@ class UserController extends Controller
      *     path="/api/V1/user",
      *     summary="Get user",
      *     tags={"User"},
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(response="200", description="Get user", @OA\JsonContent()),
      *     @OA\Response(response="404", description="User not found", @OA\JsonContent())
      * )
@@ -101,9 +102,9 @@ class UserController extends Controller
      *         name="password",
      *         in="query",
      *         description="User's password",
-     *         required=true,
      *         @OA\Schema(type="string")
      *     ),
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(response="200", description="User updated successfully", @OA\JsonContent()),
      *     @OA\Response(response="422", description="Do not update user", @OA\JsonContent()),
      *     @OA\Response(response="404", description="User not found", @OA\JsonContent())
@@ -131,6 +132,7 @@ class UserController extends Controller
      *     path="/api/V1/user/delete",
      *     summary="Remove user",
      *     tags={"User"},
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(response="200", description="User removed successfully", @OA\JsonContent()),
      *     @OA\Response(response="404", description="User not found", @OA\JsonContent())
      * )
@@ -141,10 +143,6 @@ class UserController extends Controller
 
         if (! $user) {
             throw new UserNotFoundException();
-        }
-
-        if (empty($id)) {
-            throw new IdNotFoundException();
         }
 
         $this->service->delete($user?->id);

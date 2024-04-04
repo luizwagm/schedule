@@ -123,7 +123,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/V1/schedule/{id}": {
@@ -161,7 +166,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -183,7 +193,6 @@
                         "name": "start_date",
                         "in": "query",
                         "description": "Schedule's start_date",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -192,7 +201,6 @@
                         "name": "end_date",
                         "in": "query",
                         "description": "Schedule's end_date",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -201,7 +209,6 @@
                         "name": "title",
                         "in": "query",
                         "description": "Schedule's title",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -210,7 +217,6 @@
                         "name": "type",
                         "in": "query",
                         "description": "Schedule's type",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -219,7 +225,6 @@
                         "name": "description",
                         "in": "query",
                         "description": "Schedule's description",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -262,7 +267,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/V1/schedule/delete/{id}": {
@@ -300,7 +310,96 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/V1/schedule/all": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get all schedule",
+                "operationId": "1e16ac9cfa602327196f217d52e98298",
+                "responses": {
+                    "200": {
+                        "description": "Schedule get",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Id not found | Schedule not found exception. | User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/V1/schedule/filter": {
+            "post": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Filter schedules",
+                "operationId": "95897c9c2a441d14f384decd196c587f",
+                "parameters": [
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "description": "Schedule's from date",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "description": "Schedule's to date",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule get",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found | User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/V1/create": {
@@ -383,7 +482,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -405,7 +509,6 @@
                         "name": "password",
                         "in": "query",
                         "description": "User's password",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -436,7 +539,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/V1/user/delete": {
@@ -463,7 +571,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -471,7 +584,7 @@
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "name": "bearerAuth",
+                "name": "Bearer Authentication",
                 "in": "header",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"

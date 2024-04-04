@@ -18,6 +18,10 @@ APP_PORT=8080 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan migrate
 ```
 
+```shell
+./vendor/bin/sail artisan l5-swagger:generate
+```
+
 ## Access
 
 [http://localhost:8080](http://localhost:8080)
@@ -31,6 +35,4 @@ APP_PORT=8080 ./vendor/bin/sail up -d
 
 ```shell
 ./vendo/bin/sail artisan test
-
-./vendo/bin/sail artisan test --coverage
 ```

@@ -3,9 +3,10 @@
 namespace Tests\Feature;
 
 use App\Http\Requests\User\UserRequest;
-use App\Models\User;
+use App\Http\Requests\User\UserUpdateRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -17,38 +18,24 @@ class UserTest extends TestCase
         'Content-Type' => 'application/json',
     ];
 
-    private $cnpjFaker = '30403877000194';
-
-    private function setupUser(
-        string $userType = 'seller',
-        string $documentType = 'cpf',
-        string $documentValue = '05127574020'
-    ) {
+    private function setupUser()
+    {
         $this->setUpFaker();
 
         $payload = [
             'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
-            $documentType => $documentValue,
             'email' => $this->faker->email,
             'password' => $this->faker->password(6, 20),
-            'user_type' => $userType,
-            'document_type' => $documentType,
-            'phone' => $this->faker->phoneNumber
         ];
-
-        if ($documentType == User::DOCUMENT_TYPE_CNPJ) {
-            $payload['company_name'] = $this->faker->firstName() . ' ' . $this->faker->lastName();
-            $payload['state_registration'] = $this->faker->numberBetween(1000, 10000);
-        }
 
         return new UserRequest($payload);        
     }
 
     /**
-     * Create user seller with cpf and return 201
+     * Create user successfully
      * @test
      */
-    public function create_user_seller_with_cpf_successfully(): void
+    public function create_user_successfully(): void
     {
         $payload = $this->setupUser();
 
@@ -58,62 +45,132 @@ class UserTest extends TestCase
     }
 
     /**
-     * Create user seller with cnpj and return 201
+     * Create user erro some field
      * @test
      */
-    public function create_user_seller_with_cnpj_successfully(): void
+    public function create_user_error_some_field(): void
     {
-        $payload = $this->setupUser('seller', 'cnpj', $this->cnpjFaker);
+        $this->setUpFaker();
 
-        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
-
-        $response->assertStatus(201);
-    }
-
-    /**
-     * Do not create an existing user with cpf
-     * @test
-     */
-    public function do_not_create_an_existing_user_with_cpf(): void
-    {
-        $payload = $this->setupUser();
-
-        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
-
-        $response->assertStatus(201);
-
-        $response2 = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
-
-        $response2->assertStatus(302);
-    }
-
-    /**
-     * Do not create an existing user with cnpj
-     * @test
-     */
-    public function do_not_create_an_existing_user_with_cnpj(): void
-    {
-        $payload = $this->setupUser('seller', 'cnpj', $this->cnpjFaker);
-
-        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
-
-        $response->assertStatus(201);
-
-        $response2 = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
-
-        $response2->assertStatus(302);
-    }
-
-    /**
-     * Do not create an user with user type not accept
-     * @test
-     */
-    public function do_not_create_an_user_with_user_type_not_accept(): void
-    {
-        $payload = $this->setupUser('buyee', 'cpf');
+        $payload = new UserRequest([
+            'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
+            'email' => '',
+            'password' => $this->faker->password(6, 20),
+        ]);
 
         $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
 
         $response->assertStatus(302);
+    }
+
+    /**
+     * Cannot Create user already existing
+     * @test
+     */
+    public function cannot_create_user_already_existing(): void
+    {
+        $payload = $this->setupUser();
+
+        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
+        $response->assertStatus(201);
+        
+        $response2 = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
+        $response2->assertStatus(302);
+    }
+
+    /**
+     * Get user existing
+     * @test
+     */
+    public function get_user_existing(): void
+    {
+        $this->setUpFaker();
+
+        $email = $this->faker->email;
+        $password = $this->faker->password(6, 20);
+
+        $payload = new UserRequest([
+            'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
+        $response->assertStatus(201);
+
+        $payloadLogin = new Request([
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        $login = $this->call('POST', route('auth.login'), $payloadLogin->toArray(), [], [], $this->server);
+        $login->assertStatus(200);
+
+        $getUser = $this->call('GET', route('user.get'), [], [], [], $this->server);
+        $getUser->assertStatus(200);        
+    }
+
+    /**
+     * Update user existing
+     * @test
+     */
+    public function update_user_existing(): void
+    {
+        $this->setUpFaker();
+
+        $email = $this->faker->email;
+        $password = $this->faker->password(6, 20);
+
+        $payload = new UserRequest([
+            'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
+            'email' => $email,
+            'password' => $password,
+        ]);
+        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
+        $response->assertStatus(201);
+
+        $payloadLogin = new Request([
+            'email' => $email,
+            'password' => $password,
+        ]);
+        $login = $this->call('POST', route('auth.login'), $payloadLogin->toArray(), [], [], $this->server);
+        $login->assertStatus(200);
+
+        $payloadUpdate = new UserUpdateRequest([
+            'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
+            'password' => '123456',
+        ]);
+        $update = $this->call('PUT', route('user.update'), $payloadUpdate->toArray(), [], [], $this->server);
+        $update->assertStatus(200);     
+    }
+
+    /**
+     * Delete user existing
+     * @test
+     */
+    public function delete_user_existing(): void
+    {
+        $this->setUpFaker();
+
+        $email = $this->faker->email;
+        $password = $this->faker->password(6, 20);
+
+        $payload = new UserRequest([
+            'fullname' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
+            'email' => $email,
+            'password' => $password,
+        ]);
+        $response = $this->call('POST', route('user.create'), $payload->toArray(), [], [], $this->server);
+        $response->assertStatus(201);
+
+        $payloadLogin = new Request([
+            'email' => $email,
+            'password' => $password,
+        ]);
+        $login = $this->call('POST', route('auth.login'), $payloadLogin->toArray(), [], [], $this->server);
+        $login->assertStatus(200);
+
+        $update = $this->call('POST', route('user.delete'), [], [], [], $this->server);
+        $update->assertStatus(200);     
     }
 }

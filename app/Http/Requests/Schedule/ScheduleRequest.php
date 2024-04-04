@@ -19,7 +19,6 @@ class ScheduleRequest extends FormRequest
             'title' => 'required',
             'type' => 'required',
             'description' => 'required',
-            'status' => 'in:open,concluded',
         ];
     }
 }

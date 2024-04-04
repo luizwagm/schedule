@@ -13,12 +13,14 @@ class CheckAlreadyUseDateListener
 
     public function handle($event)
     {
-        $get = $this->repository->dateAlreadyUse($event?->schedule);
+        if (! empty($event?->schedule?->start_date)) {
+            $execute = $this->repository->dateAlreadyUse($event?->schedule);
+        
+            if ($execute) {
+                throw new ScheduleCannotCreatedDateAlreadyUseException();
 
-        if ($get) {
-            throw new ScheduleCannotCreatedDateAlreadyUseException();
-
-            return false;
+                return false;
+            }
         }
     }
 }

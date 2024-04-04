@@ -14,10 +14,12 @@ Route::prefix('V1')->group(function () {
         });
 
         Route::prefix('schedule')->group(function () {
+            Route::get('/all', [ScheduleController::class, 'all'])->name('schedule.all');
             Route::get('/{id}', [ScheduleController::class, 'get'])->name('schedule.get');
             Route::post('/', [ScheduleController::class, 'create'])->name('schedule.create');
             Route::put('/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
             Route::post('/delete/{id}', [ScheduleController::class, 'delete'])->name('schedule.delete');
+            Route::post('/filter', [ScheduleController::class, 'filter'])->name('schedule.filter');
         });
     });
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Schedule;
 
+use App\Http\Requests\Schedule\ScheduleFilterRequest;
 use App\Models\Schedule;
 use App\Repositories\Schedule\ScheduleRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,5 +31,15 @@ class ScheduleService implements ScheduleServiceInterface
     public function delete(int $id): void
     {
         $this->repository->delete($id);
+    }
+
+    public function all(): Collection
+    {
+        return $this->repository->all();
+    }
+
+    public function filter(ScheduleFilterRequest $request): Collection
+    {
+        return $this->repository->filter($request);
     }
 }

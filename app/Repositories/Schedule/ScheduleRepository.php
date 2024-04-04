@@ -5,9 +5,12 @@ namespace App\Repositories\Schedule;
 use App\Exceptions\ScheduleNotCreateException;
 use App\Exceptions\ScheduleNotFoundException;
 use App\Exceptions\UserNotFoundException;
+use App\Http\Requests\Schedule\ScheduleFilterRequest;
 use App\Http\Requests\Schedule\ScheduleRequest;
+use App\Http\Requests\Schedule\ScheduleUpdateRequest;
 use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 
 class ScheduleRepository implements ScheduleRepositoryInterface
 {
@@ -23,7 +26,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             throw new UserNotFoundException();
         }
         
-        $schedule = $this->model->with('user')->find($id);
+        $schedule = $this->model->find($id);
 
         if (! $schedule) {
             throw new ScheduleNotFoundException();
@@ -40,12 +43,11 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             throw new UserNotFoundException();
         }
         
-        $schedules = $this->model
-            ->with('user')
+        return $this->model
             ->where('user_id', $user?->id)
-            ->get();
-
-        return $schedules->latest()->first()->id;
+            ->orderBy('created_at', 'desc')
+            ->first()
+            ->id;            
     }
 
     public function create(ScheduleRequest $request): Schedule
@@ -64,7 +66,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
                 'title' => $request?->title,
                 'type' => $request?->type,
                 'description' => $request?->description,
-                'user_id' => $request?->$user->id,
+                'user_id' => $user?->id,
             ]
         );
 
@@ -75,7 +77,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
         return $createSchedule;
     }
 
-    public function update(ScheduleRequest $request, int $id): Schedule
+    public function update(ScheduleUpdateRequest $request, int $id): Schedule
     {
         $user = auth()?->user();
 
@@ -92,12 +94,12 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             throw new ScheduleNotFoundException();
         }
 
-        $schedule->start_date = $request?->start_date;
-        $schedule->end_date = $request?->end_date;
-        $schedule->title = $request?->title;
-        $schedule->type = $request?->type;
-        $schedule->status = $request?->status;
-        $schedule->description = $request?->description;
+        $schedule->start_date = $request?->start_date ?? $schedule->start_date;
+        $schedule->end_date = $request?->end_date ?? $schedule->end_date;
+        $schedule->title = $request?->title ?? $schedule->title;
+        $schedule->type = $request?->type ?? $schedule->type;
+        $schedule->status = $request?->status ?? $schedule->status;
+        $schedule->description = $request?->description ?? $schedule->description;
 
         $schedule->save();
 
@@ -121,7 +123,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
         $this->model->where('id', $id)->delete();
     }
 
-    public function dateAlreadyUse(ScheduleRequest $request): Schedule
+    public function dateAlreadyUse(Request $request): Schedule|null
     {
         $user = auth()?->user();
 
@@ -129,15 +131,15 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             throw new UserNotFoundException();
         }
 
-        $getSchedule = $this->model->where('user_id', $user->id)->get();
-
-        return $getSchedule
-            ->where('start_date', '>=', $request?->start_date)
-            ->where('end_date', '<=', $request?->end_date)
+        return $this->model
+            ->where('user_id', $user->id)
+            ->where('start_date', '<=', $request->start_date)
+            ->where('end_date', '>', $request->start_date)
+            ->where('status', Schedule::OPEN)
             ->first();
     }
 
-    public function filter($request): Collection
+    public function filter(ScheduleFilterRequest $request): Collection
     {
         $user = auth()?->user();
 
@@ -145,13 +147,20 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             throw new UserNotFoundException();
         }
 
-        $getSchedule = $this->model->where('user_id', $user->id)->get();
-
-        $filter = $getSchedule
-            ->whereDate('start_date', '>=', $request?->from_date)
-            ->whereDate('start_date', '<=', $request?->to_date)
+        return $this->model
+            ->where('user_id', $user->id)
+            ->whereBetween('start_date', [$request?->from_date, $request?->to_date])
             ->get();
+    }
 
-        return $filter;
+    public function all(): Collection
+    {
+        $user = auth()?->user();
+
+        if (! $user) {
+            throw new UserNotFoundException();
+        }
+        
+        return $this->model->where('user_id', $user?->id)->get();
     }
 }

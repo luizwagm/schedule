@@ -5,6 +5,7 @@ namespace App\Repositories\User;
 use App\Exceptions\UserNotCreateException;
 use App\Exceptions\UserNotFoundException;
 use App\Http\Requests\User\UserRequest;
+use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\User;
 
 class UserRepository implements UserRepositoryInterface
@@ -21,7 +22,7 @@ class UserRepository implements UserRepositoryInterface
             throw new UserNotFoundException();
         }
 
-        return $user;
+        return $this->model->find($user->id);
     }
 
     public function getLasted(): User
@@ -48,7 +49,7 @@ class UserRepository implements UserRepositoryInterface
         return $createUser;
     }
 
-    public function update(UserRequest $request): User
+    public function update(UserUpdateRequest $request): User
     {
         $user = auth()?->user();
 
@@ -63,11 +64,14 @@ class UserRepository implements UserRepositoryInterface
         }
 
         $user->fullname = $request?->fullname;
-        $user->password = $request?->password;
+
+        if (! empty($request?->password)) {
+            $user->password = $request?->password;
+        }
 
         $user->save();
 
-        return $user;
+        return $this->model->where('id', $user->id)->first();
     }
 
     public function delete(): void

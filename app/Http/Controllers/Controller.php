@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
  * @OA\SecurityScheme(
  *      securityScheme="bearerAuth",
  *      in="header",
- *      name="bearerAuth",
+ *      name="Bearer Authentication",
  *      type="http",
  *      scheme="bearer",
  *      bearerFormat="JWT",
