@@ -1,13 +1,23 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('V2')->group(function () {
+Route::prefix('V1')->group(function () {
     Route::middleware(['auth:api'])->group(function() {
         Route::prefix('user')->group(function () {
-            Route::get('/{id}', [UserController::class, 'get'])->name('user.get');
+            Route::get('/', [UserController::class, 'get'])->name('user.get');
+            Route::put('/', [UserController::class, 'update'])->name('user.update');
+            Route::post('/delete', [UserController::class, 'delete'])->name('user.delete');
+        });
+
+        Route::prefix('schedule')->group(function () {
+            Route::get('/{id}', [ScheduleController::class, 'get'])->name('schedule.get');
+            Route::post('/', [ScheduleController::class, 'create'])->name('schedule.create');
+            Route::put('/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
+            Route::post('/delete/{id}', [ScheduleController::class, 'delete'])->name('schedule.delete');
         });
     });
 

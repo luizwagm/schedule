@@ -2,34 +2,44 @@
 
 namespace App\Providers;
 
+use App\Events\CreateScheduleEvent;
 use App\Events\CreateUserEvent;
+use App\Events\UpdateScheduleEvent;
+use App\Events\UpdateUserEvent;
+use App\Listeners\CheckAlreadyUseDateListener;
+use App\Listeners\CheckIsWeekendsDateListener;
+use App\Listeners\CreateScheduleListener;
 use App\Listeners\CreateUserListener;
+use App\Listeners\UpdateScheduleListener;
+use App\Listeners\UpdateUserListener;
 use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event listener mappings for the application.
-     *
-     * @var array<class-string, array<int, class-string>>
-     */
     protected $listen = [
         CreateUserEvent::class => [
             CreateUserListener::class,
         ],
+        UpdateUserEvent::class => [
+            UpdateUserListener::class,
+        ],
+        CreateScheduleEvent::class => [
+            CheckAlreadyUseDateListener::class,
+            CheckIsWeekendsDateListener::class,
+            CreateScheduleListener::class
+        ],
+        UpdateScheduleEvent::class => [
+            CheckAlreadyUseDateListener::class,
+            CheckIsWeekendsDateListener::class,
+            UpdateScheduleListener::class
+        ],
     ];
 
-    /**
-     * Register services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         //

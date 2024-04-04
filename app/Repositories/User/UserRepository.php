@@ -2,61 +2,82 @@
 
 namespace App\Repositories\User;
 
+use App\Exceptions\UserNotCreateException;
+use App\Exceptions\UserNotFoundException;
 use App\Http\Requests\User\UserRequest;
 use App\Models\User;
-use Exception;
 
 class UserRepository implements UserRepositoryInterface
 {
-    /**
-     * Construct function
-     *
-     * @param User $user
-     */
     public function __construct(
         protected User $model
     ) {}
 
-    /**
-     * Get function
-     *
-     * @param integer $id
-     * @param string $document
-     * @return User
-     */
-    public function get(int $id, string $document = ''): User
+    public function get(): User
     {
-        if (empty($document)) {
-            return $this->model->find($id);
+        $user = auth()?->user();
+
+        if (! $user) {
+            throw new UserNotFoundException();
         }
 
-        return $this->model->where('document', $document)->first();
+        return $user;
     }
 
-    /**
-     * Create function
-     *
-     * @param UserRequest $request
-     * @return User|Exception
-     */
-    public function create(UserRequest $request): User|Exception
+    public function getLasted(): User
+    {       
+        return $this->model
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
+    public function create(UserRequest $request): User
     {
-        try {
-            return $this->model->create(
-                [
-                    'fullname' => $request?->fullname,
-                    'document' => $request?->document_type == User::DOCUMENT_TYPE_CPF ? $request?->cpf : $request?->cnpj,
-                    'email' => $request?->email,
-                    'password' => $request?->password,
-                    'user_type' => $request?->user_type,
-                    'document_type' => $request?->document_type,
-                    'phone' => $request?->phone,
-                    'company_name' => $request?->company_name,
-                    'state_registration' => $request?->state_registration
-                ]
-            );
-        } catch (\Exception $e) {
-            return $e;
+        $createUser = $this->model->create(
+            [
+                'fullname' => $request?->fullname,
+                'email' => $request?->email,
+                'password' => $request?->password,
+            ]
+        );
+
+        if (! $createUser) {
+            throw new UserNotCreateException();
         }
+
+        return $createUser;
+    }
+
+    public function update(UserRequest $request): User
+    {
+        $user = auth()?->user();
+
+        if (! $user) {
+            throw new UserNotFoundException();
+        }
+
+        $user = $this->model->find($user->id);
+
+        if (! $user) {
+            throw new UserNotFoundException();
+        }
+
+        $user->fullname = $request?->fullname;
+        $user->password = $request?->password;
+
+        $user->save();
+
+        return $user;
+    }
+
+    public function delete(): void
+    {
+        $user = auth()?->user();
+
+        if (! $user) {
+            throw new UserNotFoundException();
+        }
+
+        $this->model->where('id', $user->id)->delete();
     }
 }

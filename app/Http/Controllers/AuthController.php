@@ -13,7 +13,7 @@ class AuthController extends Controller
 
     /**
     * @OA\Post(
-     *     path="/api/V2/login",
+     *     path="/api/V1/login",
      *     summary="Login user",
      *     tags={"Auth"},
      *     @OA\Parameter(

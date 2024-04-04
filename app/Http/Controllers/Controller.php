@@ -6,8 +6,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * @OA\Info(
- *    title="ECOLife",
- *    version="2.0.0",
+ *    title="Schedule API",
+ *    version="1.0.0",
  * ),
  * @OA\SecurityScheme(
  *      securityScheme="bearerAuth",

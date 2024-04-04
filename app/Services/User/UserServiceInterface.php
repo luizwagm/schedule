@@ -7,20 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface UserServiceInterface
 {
-    /**
-     * Get user function
-     *
-     * @param integer $id
-     * @param string $document
-     * @return User
-     */
-    public function get(int $id, string $document = ''): User;
-
-    /**
-     * Get all notifications function
-     *
-     * @param integer $id
-     * @return Collection
-     */
-    public function notifications(int $id): Collection;
+    public function get(): User;
+    public function getLatestUser(): User;
+    public function delete(int $id): void;
 }

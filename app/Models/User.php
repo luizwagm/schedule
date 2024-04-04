@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,23 +13,10 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    const USER_TYPE_SELLER = 'seller';
-    const USER_TYPE_BUYER = 'buyer';
-    const USER_TYPE_ENGINEER = 'engineer';
-
-    const DOCUMENT_TYPE_CPF = 'cpf';
-    const DOCUMENT_TYPE_CNPJ = 'cnpj';
-
     protected $fillable = [
         'fullname',
-        'document',
-        'document_type',
         'email',
-        'phone',
-        'company_name',
-        'state_registration',
         'password',
-        'user_type',
     ];
 
     protected $hidden = [
@@ -53,5 +41,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'user_id', 'id');
     }
 }
